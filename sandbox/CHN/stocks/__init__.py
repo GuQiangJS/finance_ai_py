@@ -1,5 +1,3 @@
-__all__=[
-    'reader',
-    'simulation',
-    'globalSettings'
+__all__ = [
+    'simulation'
 ]
