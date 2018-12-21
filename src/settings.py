@@ -3,4 +3,16 @@
 
 # 常用设置
 
-encoding = 'utf-8'  # 文件默认字符编码
+
+class Default:
+    """默认设置"""
+
+    @staticmethod
+    def market():
+        """默认市场"""
+        return 'CHN'
+
+    @staticmethod
+    def encoding():
+        """文件默认字符编码"""
+        return 'utf-8'

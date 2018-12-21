@@ -5,13 +5,15 @@
 
 import os
 
+from .settings import Default
 
-def get_his_data_path(symbol, inSandBox=True, c='CHN'):
-    """获取沙盒 **每日成交汇总数据文件路径**
+
+def get_his_data_path(symbol, in_sand_box=True, market=Default.market()):
+    """获取 **每日成交汇总数据文件路径**
 
     Args:
-        inSandBox: 是否从沙盒中读取数据。默认 True。
-        c: 国家代码。默认'CHN'。
+        in_sand_box: 是否从沙盒中读取数据。默认 True。
+        market: 国家代码。默认 `settings.Default.market()`。
         symbol: 指定股票代码。
 
     Returns:
@@ -21,9 +23,9 @@ def get_his_data_path(symbol, inSandBox=True, c='CHN'):
         不支持读取非沙箱数据
 
     """
-    if inSandBox:
+    if in_sand_box:
         return os.path.join(os.path.dirname(os.path.dirname(__file__)),
-                            'sandbox', c, 'stocks', 'datas', 'his',
+                            'sandbox', market, 'stocks', 'datas', 'his',
                             '{0}.csv'.format(symbol))
     else:
         raise NotImplementedError

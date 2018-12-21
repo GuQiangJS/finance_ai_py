@@ -29,7 +29,7 @@ def get_symbol_data(symbol, use_sand_data=True) -> pd.DataFrame:
         raise ValueError('symbol')
     if use_sand_data:
         df = pd.read_csv(unit.get_his_data_path(symbol),
-                         encoding=settings.encoding)
+                         encoding=settings.Default.encoding())
         df.set_index('Date', inplace=True)
         return df
     else:
