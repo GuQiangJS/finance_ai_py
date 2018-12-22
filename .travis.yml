@@ -1,5 +1,3 @@
-os: osx
-
 sudo: false
 
 language: python
@@ -19,7 +17,10 @@ matrix:
 
 
 before_install:
-- brew install ta-lib
+  - curl -L http://prdownloads.sourceforge.net/ta-lib/ta-lib-0.4.0-src.tar.gz --output
+    ta-lib-0.4.0-src.tar.gz
+  - tar zxf ta-lib-0.4.0-src.tar.gz
+  - cd ta-lib && ./configure --prefix=/usr && make && sudo make install && cd ..
 install:
   - pip install coverage
   - python setup.py install
