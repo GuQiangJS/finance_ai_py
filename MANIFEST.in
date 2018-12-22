@@ -1,0 +1,7 @@
+include readme.rst
+include LICENSE
+
+recursive-include finance_ai_py *.py
+
+include versioneer.py
+include finance_ai_py/_version.py
