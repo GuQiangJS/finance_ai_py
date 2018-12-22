@@ -1,7 +1,7 @@
 依赖组件
 =================
 
-* [ta-Lib](http://mrjbq7.github.io/ta-lib/install.html)
+* `ta-Lib<http://mrjbq7.github.io/ta-lib/install.html>`_
 
 * [QUANTAXIS](https://github.com/QUANTAXIS/QUANTAXIS)
 
