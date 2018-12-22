@@ -24,6 +24,8 @@ before_install:
   - tar zxf ta-lib-0.4.0-src.tar.gz
   - cd ta-lib && ./configure --prefix=/usr && make && sudo make install && cd ..
 install:
+  - pip install Twisted
+  - pip install pyasn1
   - pip install pyasn1-modules
   - pip install TA-Lib
   - pip install coverage

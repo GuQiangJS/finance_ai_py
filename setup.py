@@ -36,7 +36,7 @@ setup(
         'Topic :: Scientific/Engineering',
     ],
     keywords='data',
-    install_requires=['ta-Lib', 'pandas', 'QUANTAXIS', 'numpy', 'seaborn',
+    install_requires=['TA-Lib', 'pandas', 'QUANTAXIS', 'numpy', 'seaborn',
                       'matplotlib'],
     packages=find_packages(),
     zip_safe=False,
