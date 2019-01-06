@@ -14,6 +14,8 @@
 
 > [https://docs.mongodb.com/manual/tutorial/install-mongodb-on-windows/](https://docs.mongodb.com/manual/tutorial/install-mongodb-on-windows/)
 
-数据下载到本地可以使用 [update_data.py](https://github.com/QUANTAXIS/QUANTAXIS/blob/master/config/update_data.py)
+数据下载到本地可以使用 [update_x.py](https://github.com/QUANTAXIS/QUANTAXIS/blob/master/config/update_x.py)
+
+[update_date.py](https://github.com/QUANTAXIS/QUANTAXIS/blob/master/config/update_data.py)用来每日更新数据
 
 数据下载完成后的使用参考 [从本地mongodb中读取数据.ipynb](从本地mongodb中读取数据.ipynb)
