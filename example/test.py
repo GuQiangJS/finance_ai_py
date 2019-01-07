@@ -5,7 +5,7 @@ import units
 import settings
 import QUANTAXIS as QA
 
-code_list = QA.QA_fetch_stock_list_adv()
-
-df=units.get_daily_return(code_list['code'][0:10].values,'000010',settings.stock_daily_start,settings.stock_daily_end)
+df=units.fetch_stock_day_adv('000002','2018-01-01','2018-12-31')
+l=units.calc_bbands_cross(df['close'],0,timeperiod=30)
+print(l)
 pass
