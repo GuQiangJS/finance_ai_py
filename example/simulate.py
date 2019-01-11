@@ -1,10 +1,10 @@
 # Copyright (C) 2018 GuQiangJs.
 # Licensed under http://www.apache.org/licenses/LICENSE-2.0 <see LICENSE file>
 
+import calculator
 import numpy as np
 import pandas as pd
 import talib
-import units
 
 
 def simulate_buy_sale(s: pd.Series, ma_type: talib.MA_Type, timeperiod=5,
@@ -20,12 +20,13 @@ def simulate_buy_sale(s: pd.Series, ma_type: talib.MA_Type, timeperiod=5,
         sale_up_cost: 只有当当前价格超过持仓平均价时才卖出
 
     Returns:
-        [低于下轨的`pd.Series`，超过上轨的`pd.Series`]
+        [当前持仓数量, 当前持仓成本, 当前资金, 盈亏, 最后一个交易日价格,
+            最大资金占用, 买入次数, 卖出次数]
 
     """
     # 计算买入点和卖出点
-    l, u = units.calc_bbands_cross(s, ma_type, timeperiod=timeperiod,
-                                   nbdevup=nbdevup, nbdevdn=nbdevdn)
+    l, u = calculator.calc_bbands_cross(s, ma_type, timeperiod=timeperiod,
+                                        nbdevup=nbdevup, nbdevdn=nbdevdn)
 
     # 可买时间点和价格
     df_b = pd.DataFrame(l)
@@ -78,7 +79,7 @@ def simulate_buy_sale(s: pd.Series, ma_type: talib.MA_Type, timeperiod=5,
     if print_log:
         print('当前持仓数量:{}'.format(hold))
         print('当前持仓成本:{}'.format(np.average(cost)))
-        print('当前金额:{}'.format(amount))
+        print('当前资金:{}'.format(amount))
         print('盈亏:{}'.format(np.sum(cost) * size + amount))
         print('最后一个交易日价格:{}'.format(s[-1]))
         print('最大资金占用:{}'.format(np.abs(max_amount)))
