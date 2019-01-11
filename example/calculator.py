@@ -6,8 +6,7 @@
 import numpy as np
 import pandas as pd
 import talib
-from quantaxis_ext import fetch_index_day_adv
-from quantaxis_ext import fetch_stock_day_adv
+from quantaxis_ext import fetch_index_stock_daily_adv
 
 
 def calc_bbands_cross(s: pd.Series, ma_type: talib.MA_Type, timeperiod=5,
@@ -32,7 +31,7 @@ def calc_bbands_cross(s: pd.Series, ma_type: talib.MA_Type, timeperiod=5,
     return s[lower > s], s[upper < s]
 
 
-def _calc_daily_return(s: pd.Series) -> pd.Series:
+def _calc_daily_return(s):
     """计算日收益"""
     return (s / s.shift(1) - 1).dropna()
 
@@ -109,18 +108,5 @@ def calc_daily_return(symbol, zs, start, end) -> pd.DataFrame:
         例如：传入参数为 `000300` 那么返回的列名为 `zs_000300` 。
         其他股票列名不变，依旧为股票代码。
     """
-    zs_df = fetch_index_day_adv(zs, start, end)
-    zs_daily_return = _calc_daily_return(zs_df['close']).rename('zs_' + zs)
-    result = pd.DataFrame(zs_daily_return)
-    lst = []
-    if isinstance(symbol, str):
-        lst.append(symbol)
-    else:
-        lst = symbol
-    for s in lst:
-        symbol_df = fetch_stock_day_adv(s, start, end)
-        if symbol_df.empty:
-            continue
-        symbol_daily_return = _calc_daily_return(symbol_df['close']).rename(s)
-        result = result.join(symbol_daily_return)
-    return result
+    return _calc_daily_return(
+        fetch_index_stock_daily_adv(symbol, zs, start, end))
