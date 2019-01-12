@@ -11,7 +11,7 @@ from QUANTAXIS import QA_fetch_stock_list
 
 def fetch_index_stock_daily_adv(symbol, zs, start, end,
                                 column='close') -> pd.DataFrame:
-    """计算指定股票和指定指数合并后的日收益表
+    """计算指定股票和指定指数合并后的日线数据
 
     Args:
         column: 使用的列名。默认为收盘价。
