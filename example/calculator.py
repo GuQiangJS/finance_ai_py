@@ -6,7 +6,7 @@
 import numpy as np
 import pandas as pd
 import talib
-from quantaxis_ext import fetch_index_stock_daily_adv
+from .quantaxis_ext import fetch_index_stock_daily_adv
 
 
 def calc_bbands_cross(s: pd.Series, ma_type: talib.MA_Type, timeperiod=5,
