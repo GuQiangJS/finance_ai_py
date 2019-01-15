@@ -48,6 +48,29 @@ def calc_normalize_data(df: pd.DataFrame) -> pd.DataFrame:
     return df / df.iloc[0]
 
 
+def calc_residual_value_of_portfolio(symbol, zs, start, end, weight, value)->pd.DataFrame:
+    """计算投资组合的剩余价值
+
+    Args:
+        symbol:
+        zs:
+        start:
+        end:
+        weight: 分配权重
+        value: 初始总额
+
+    Returns:
+
+    """
+    daily_df=fetch_index_stock_daily_adv(symbol,zs, start,end) #首先获得日收盘价格
+    # 移除指数列
+    daily_normed = daily_df.copy().drop('zs_'+zs, axis=1)
+    # 收盘价归一化
+    daily_normed=daily_normed/daily_normed.iloc[0]
+    # 剩余价值明细表
+    return daily_normed*weight*value
+
+
 def calc_sharp_radio(symbol, zs, start, end, c='00') -> pd.Series:
     """计算指定股票相对指定指数的夏普比率
 
