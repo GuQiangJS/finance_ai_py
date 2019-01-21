@@ -82,19 +82,25 @@
 
 ---
 
-## For Python 3.5
+## jupyter lab 插件
+
+https://github.com/ipython-contrib/jupyter_contrib_nbextensions
+
+---
+
+## For Python 3.5.6
 
 1. 创建 conda 工作区
 
-    `conda create -n finance_35 python=3.5`
+    `conda create -n finance356 python=3.5.6`
 
 2. 激活工作区
 
-    `conda activate finance_35`
+    `conda activate finance356`
 
 3. 安装 zipline
 
-    `conda install -c Quantopian zipline`
+    `conda install -c quantopian zipline`
 
 4. 安装 cvxopt
 
@@ -107,3 +113,19 @@
 6. 安装 pyfoilo
 
     `pip install pyfolio`
+
+7. 安装 QUANTAXIS
+
+    `pip install quantaxis`
+
+    > 坑爹的代码 (**`async`**) 不支持 Python3.5 
+    > 
+    > [PEP 530 -- Asynchronous Comprehensions](https://www.python.org/dev/peps/pep-0530/)
+    > 
+    > ```python
+    > try:
+    >     res = pd.DataFrame([item async for item in cursor])
+    > except SyntaxError:
+    >     print('THIS PYTHON VERSION NOT SUPPORT "async for" function')
+    >     pass
+    > ```
