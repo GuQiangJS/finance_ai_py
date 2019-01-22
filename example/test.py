@@ -1,1 +1,0 @@
-from zipline.algorithm import TradingAlgorithm

@@ -19,14 +19,14 @@
     > 使用这个语句安装会把Python降版
     > ```Batchfile
     > The following packages will be DOWNGRADED:
-    > 
+    >
     > python:            3.6.8-h9f7ef89_0                   --> 2.7.15-hcb6e200_5
     > vc:                14.1-h0510ff6_4                    --> 9-h7299396_1
-    > 
+    >
     > Proceed ([y]/n)? n
     > ```
     > [The latest zipline-1.1.1 is not supported by Python 3.6?](https://github.com/quantopian/zipline/issues/1938)
-    > 
+    >
     > Sorry for the trouble. Zipline should run on python 3.6, but we don't have conda packages for it. We have 2.7, 3.4, and 3.5. If you have a local compiler toolchain set up properly, you should be able to pip install zipline in your 3.6 environment.
 
 4. 安装 cvxopt
@@ -39,7 +39,7 @@
 
     > 会将 Python3.6 降版至 3.5
 
-    ~~`pip install ta-lib`。无论是下载 [ta-lib-0.4.0-msvc.zip](http://prdownloads.sourceforge.net/ta-lib/ta-lib-0.4.0-msvc.zip) 还是 [https://github.com/afnhsn/TA-Lib_x64 ](https://github.com/afnhsn/TA-Lib_x64)。虽然用 `nmake` 编译不出错，但是安装时还是会有以下错误。~~
+    ~~`pip install ta-lib`。无论是下载 [ta-lib-0.4.0-msvc.zip](http://prdownloads.sourceforge.net/ta-lib/ta-lib-0.4.0-msvc.zip) 还是 [https://github.com/afnhsn/TA-Lib_x64](https://github.com/afnhsn/TA-Lib_x64)。虽然用 `nmake` 编译不出错，但是安装时还是会有以下错误。~~
 
     >```Batchfile
     > Creating library build\temp.win-amd64-3.6\Release\talib\_ta_lib.cp36-win_amd64.lib and object build\temp.win-amd64-3.6\Release\talib\_ta_lib.cp36-win_amd64.exp
@@ -52,7 +52,7 @@
     所以改为使用 `pip install TA_Lib-0.4.17-cp36-cp36m-win_amd64.whl`
 
     > You might also try these unofficial windows binaries for both 32-bit and 64-bit:
-    > 
+    >
     > https://www.lfd.uci.edu/~gohlke/pythonlibs/#ta-lib
 
 6. 安装 pyfoilo
@@ -82,21 +82,41 @@
 
 ---
 
+## sphinxcontrib-napoleon
+
+https://github.com/sphinx-contrib/napoleon
+
+`pip install sphinxcontrib-napoleon`
+
 ## jupyter lab 插件
 
 https://github.com/ipython-contrib/jupyter_contrib_nbextensions
 
+`conda install -c conda-forge jupyter_contrib_nbextensions`
+
+## pylint
+
+https://www.pylint.org/#install
+
+[如何使用Pylint 来规范Python 代码风格 - IBM](https://www.ibm.com/developerworks/cn/linux/l-cn-pylint/index.html)
+
+`pip install pylint # see note`
+
 ---
 
-## For Python 3.5.6
+## For Python 3.5
+
+> `zipline` 对Python3.5以上版本支持有问题，需要使用Python3.5版本。
+> [The latest zipline-1.1.1 is not supported by Python 3.6?](https://github.com/quantopian/zipline/issues/1938)
+> Sorry for the trouble. Zipline should run on python 3.6, but we don't have conda packages for it. We have 2.7, 3.4, and 3.5. If you have a local compiler toolchain set up properly, you should be able to pip install zipline in your 3.6 environment.
 
 1. 创建 conda 工作区
 
-    `conda create -n finance356 python=3.5.6`
+    `conda create -n finance35 python=3.5`
 
 2. 激活工作区
 
-    `conda activate finance356`
+    `conda activate finance35`
 
 3. 安装 zipline
 
@@ -116,12 +136,20 @@ https://github.com/ipython-contrib/jupyter_contrib_nbextensions
 
 7. 安装 QUANTAXIS
 
-    `pip install quantaxis`
+    ~~`pip install quantaxis`~~ 改为使用 `pip install git+https://github.com/GuQiangJS/QUANTAXIS.git --upgrade` 或者下载代码至本地安装
 
-    > 坑爹的代码 (**`async`**) 不支持 Python3.5 
-    > 
+    ```
+    $ git clone https://github.com/GuQiangJS/QUANTAXIS.git
+    $ cd QUANTAXIS
+    $ pip install
+    ```
+
+    > 从我个人Fork的分支安装只是解决了我个人遇到的不支持Python3.5以上版本的情况，不代表所有代码均支持。
+
+    > 坑爹的代码 (**`async`**) 不支持 Python3.5
+    >
     > [PEP 530 -- Asynchronous Comprehensions](https://www.python.org/dev/peps/pep-0530/)
-    > 
+    >
     > ```python
     > try:
     >     res = pd.DataFrame([item async for item in cursor])
@@ -129,3 +157,23 @@ https://github.com/ipython-contrib/jupyter_contrib_nbextensions
     >     print('THIS PYTHON VERSION NOT SUPPORT "async for" function')
     >     pass
     > ```
+
+8. 安装 pyecharts_snapshot
+
+    `pip install pyecharts_snapshot`
+
+9. 重新安装 pytdx
+
+    ```batchfile
+    pip uninstall pytdx
+    pip install pytdx
+    ```
+
+10. 安装 nb_conda_kernels（用于jupyter中可选Python运行环境）
+
+    `conda install ipykernel`，
+    `python -m ipykernel install --user --name finance35 --display-name finance_py_35`
+
+11. 安装 portfolioopt
+
+    `pip install portfolioopt`
