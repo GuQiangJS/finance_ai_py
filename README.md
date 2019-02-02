@@ -80,11 +80,27 @@ https://github.com/sphinx-contrib/napoleon
 
 `pip install sphinxcontrib-napoleon`
 
-### jupyter lab 插件
+### jupyter 插件
 
 https://github.com/ipython-contrib/jupyter_contrib_nbextensions
 
-`conda install -c conda-forge jupyter_contrib_nbextensions`
+```batchfile
+conda install -c conda-forge jupyter_contrib_nbextensions
+# Install nbextension files, and edits nbconvert config files
+jupyter contrib nbextension install --user
+# Install yapf for code prettify
+pip install yapf
+# Install autopep8
+pip install autopep8
+# Jupyter extensions configurator 
+pip install jupyter_nbextensions_configurator
+# Enable nbextensions_configurator
+jupyter nbextensions_configurator enable --user
+```
+
+[Jupyter Notebook 小贴士](http://blog.leanote.com/post/carlking5019/Jupyter-Notebook-Tips)
+
+> 如果选择了 `autopep8` ，还需要安装 `pip install autopep8`
 
 查看插件是否启动 `http://localhost:8888/nbextensions`
 
