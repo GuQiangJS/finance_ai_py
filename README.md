@@ -86,6 +86,21 @@ https://github.com/ipython-contrib/jupyter_contrib_nbextensions
 
 `conda install -c conda-forge jupyter_contrib_nbextensions`
 
+查看插件是否启动 `http://localhost:8888/nbextensions`
+
+### node.js
+
+`conda install -c conda-forge nodejs`
+
+### jupyter 支持进度条
+
+https://tqdm.github.io/
+
+`conda install -c conda-forge tqdm`
+
+> 需要先安装 `ipywidgets`。`conda install -c conda-forge ipywidgets`
+> 貌似暂时只能用在 jupyter notebook 中。
+
 ### pylint
 
 https://www.pylint.org/#install
