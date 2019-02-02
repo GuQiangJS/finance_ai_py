@@ -70,7 +70,7 @@
 
 11. 安装 portfolioopt
 
-    `pip install portfolioopt`
+    `pip install portfolioopt` 或者 `pip install git+https://github.com/czielinski/portfolioopt.git --upgrade`
 
 ---
 
