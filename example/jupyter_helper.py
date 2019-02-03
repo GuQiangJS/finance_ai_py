@@ -1,5 +1,6 @@
 # jupyter 部分帮助方法
 from QUANTAXIS import QA_fetch_index_day_adv
+import QUANTAXIS as QA
 
 def _test_index(code,start='2018-01-01',end='2018-12-31'):
     """测试指数数据是否在本地能读取到
@@ -18,3 +19,10 @@ def get_zs_code():
             return z
     if not isinstance(ZS_CODE, str):
         raise AssertionError
+
+
+def get_start_end_date():
+    ds = QA_fetch_index_day_adv(get_zs_code(),
+                                   QA.QAUtil.QADate_trade.trade_date_sse[0],
+                                   QA.QAUtil.QADate.QA_util_today_str()).date
+    return ds[0], ds[-1]
