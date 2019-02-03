@@ -2,134 +2,69 @@
 # Licensed under http://www.apache.org/licenses/LICENSE-2.0 <see LICENSE file>
 
 # 计算器
-
-import numpy as np
+from datetime import date
 import pandas as pd
-import talib
-from quantaxis_ext import fetch_index_stock_daily_adv
+from QUANTAXIS.QAUtil.QADate import QA_util_datetime_to_strdate as date_to_str
+from QUANTAXIS import QA_fetch_index_day_adv
+from QUANTAXIS import QA_fetch_stock_day_adv
+import pyfolio as pf
+import numpy as np
+
+def calc_daily_return(s: pd.Series):
+    return (s / s.shift(1) - 1)[1:]
 
 
-def calc_bbands_cross(s: pd.Series, ma_type: talib.MA_Type, timeperiod=5,
-                      nbdevup=2,
-                      nbdevdn=2):
-    """计算穿越布林带的数据
+def calc_perf_stats_by_year(code: str, benchmark_code: str, start,
+                            end) -> [pd.DataFrame]:
+    """计算指定股票年度数据指标。
+    计算 benchmark_code 开始年份 ~ 当前年份的前一年
 
-    Args:
-        timeperiod: 时间段
-        nbdevup: 上轨与平均值无偏差的标准差的数量
-        nbdevdn: 下轨与平均值无偏差的标准差的数量
-        s: 原始值
-        ma_type:
-
-    Returns:
-        [低于下轨的`pd.Series`，超过上轨的`pd.Series`]
-
+    返回：[结果]
     """
-    upper, middle, lower = talib.BBANDS(s, matype=ma_type,
-                                        timeperiod=timeperiod, nbdevup=nbdevup,
-                                        nbdevdn=nbdevdn)
-    return s[lower > s], s[upper < s]
+    start_str = start if isinstance(start,str) else date_to_str(start)
+    end_str = end if isinstance(end,str) else  date_to_str(end)
+    zs_data = QA_fetch_index_day_adv(benchmark_code, start_str,
+                                     end_str)  # 指数日线数据
 
+    result = pd.DataFrame()
 
-def _calc_daily_return(s):
-    """计算日收益"""
-    return (s / s.shift(1) - 1).dropna()
+    stock_data_bfq = QA_fetch_stock_day_adv(code, start_str,
+                                            end_str)  # 不复权的日线数据
+    if stock_data_bfq is None or stock_data_bfq.data.empty:
+        return result
 
+    stock_data_qfq = stock_data_bfq.to_qfq()  # 前复权日线数据
+    for year in range(start.year, end.year):
+        s = pd.Series()
+        zs_daily_return = calc_daily_return(
+            zs_data.data[zs_data.date.year == year]['close'])  # 指数日收益
+        stock_daily_return_qfq = calc_daily_return(
+            stock_data_qfq[stock_data_qfq.date.year == year]['close'])  # 股票日收益
 
-def calc_normalize_data(df: pd.DataFrame) -> pd.DataFrame:
-    """数据归一化。所有数据的第一条从1开始。
+        if not stock_daily_return_qfq.empty:
+            stock_daily_return_qfq_remove_code = stock_daily_return_qfq.reset_index().drop(
+                columns=['code']).set_index('date')
+            zs_daily_return_remove_code = zs_daily_return.reset_index().drop(
+                columns=['code']).set_index('date')
 
-    Args:
-        df:
+            stock_daily_return_qfq_remove_code_year = \
+                stock_daily_return_qfq_remove_code[
+                    stock_daily_return_qfq_remove_code.index.year == year]  # 当年股票日收益（前复权）
+            zs_daily_return_remove_code_year = zs_daily_return_remove_code[
+                zs_daily_return_remove_code.index.year == year]
+            s = pf.timeseries.perf_stats(
+                stock_daily_return_qfq_remove_code_year.close,
+                zs_daily_return_remove_code_year.close)
+        else:
+            s = pf.timeseries.perf_stats(stock_daily_return_qfq,
+                                         zs_daily_return)
 
-    Returns:
-
-    """
-    return df / df.iloc[0]
-
-
-def calc_residual_value_of_portfolio(symbol, zs, start, end, weight, value)->pd.DataFrame:
-    """计算投资组合的剩余价值
-
-    Args:
-        symbol:
-        zs:
-        start:
-        end:
-        weight: 分配权重
-        value: 初始总额
-
-    Returns:
-
-    """
-    daily_df=fetch_index_stock_daily_adv(symbol,zs, start,end) #首先获得日收盘价格
-    # 移除指数列
-    daily_normed = daily_df.copy().drop('zs_'+zs, axis=1)
-    # 收盘价归一化
-    daily_normed=daily_normed/daily_normed.iloc[0]
-    # 剩余价值明细表
-    return daily_normed*weight*value
-
-
-def calc_sharp_radio(symbol, zs, start, end, c='00') -> pd.Series:
-    """计算指定股票相对指定指数的夏普比率
-
-    Args:
-        symbol:
-        zs:
-        start:
-        end:
-        c: 周期。
-            * '00':年
-            * '01':季度
-            * '02':月
-            * '03':日
-
-    Returns:
-
-    """
-    daily_return = calc_daily_return(symbol, zs, start, end)
-    zs_returns = daily_return[['zs_' + zs]]
-    stock_returns = daily_return.drop(columns=['zs_' + zs])
-    # 股票日收益相对于指数日收益的差额
-    excess_returns = stock_returns.sub(zs_returns['zs_' + zs], axis='index')
-    # 股票日收益相对于指数日收益的差额的均值
-    avg_excess_return = excess_returns.mean().dropna()
-    # 股票日收益相对于指数日收益的差额的标准差
-    std_excess_return = excess_returns.std().dropna()
-
-    # 计算日 Sharpe ratio
-    daily_sharpe_ratio = avg_excess_return.div(std_excess_return)
-
-    if c == '03':
-        return daily_sharpe_ratio
-
-    if c == '00':
-        # 计算年化 sharpe ratio。根据指数记录的实际交易日计算
-        return daily_sharpe_ratio.mul(np.sqrt(zs_returns.shape[0]))
-
-    if c == '01':
-        # 计算季度
-        return daily_sharpe_ratio.mul(np.sqrt(4))
-
-    if c == '02':
-        # 计算月度
-        return daily_sharpe_ratio.mul(12)
-
-
-def calc_daily_return(symbol, zs, start, end) -> pd.DataFrame:
-    """计算指定股票和指定指数合并后的日收益表
-
-    Args:
-        symbol: 指定股票代码
-        zs: 指定指数代码
-        start: 开始日期
-        end: 结束日期
-
-    Returns:
-        返回的 `pd.DataFrame` 中的指数列会在传入参数指数前添加 **zs_** 字样。
-        例如：传入参数为 `000300` 那么返回的列名为 `zs_000300` 。
-        其他股票列名不变，依旧为股票代码。
-    """
-    return _calc_daily_return(
-        fetch_index_stock_daily_adv(symbol, zs, start, end))
+        if not s.empty:
+            s['code'] = code
+            s['year'] = year
+            if result.empty:
+                result = s.to_frame().T.set_index(['code', 'year'])
+            else:
+                result = result.append(
+                    s.to_frame().T.set_index(['code', 'year']))
+    return result.astype(np.float64)
