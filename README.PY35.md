@@ -74,6 +74,13 @@
 
     `pip install portfolioopt` 或者 `pip install git+https://github.com/czielinski/portfolioopt.git --upgrade`
 
+12. 安装 python.app
+
+    `conda install -c conda-forge python.app`
+    > 对于在Mac下运行来说，需要安装这个。**并且以 pythonw 方式运行**。否则会出现以下错误：
+    > ImportError: Python is not installed as a framework. The Mac OS X backend will not be able to function correctly if Python is not installed as a framework. See the Python documentation for more information on installing Python as a framework on Mac OS X. Please either reinstall Python as a framework, or try one of the other backends. If you are using (Ana)Conda please install python.app and replace the use of 'python' with 'pythonw'. See 'Working with Matplotlib on OSX' in the Matplotlib FAQ for more information.
+    > https://matplotlib.org/faq/osx_framework.html#conda
+
 ---
 
 ### sphinxcontrib-napoleon
