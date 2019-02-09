@@ -7,6 +7,7 @@ import pandas as pd
 import pyfolio as pf
 from QUANTAXIS.QAUtil.QADate import QA_util_datetime_to_strdate as date_to_str
 from pandas import DataFrame
+from pyecharts import Line
 
 
 def _test_index(code, start='2018-01-01', end='2018-12-31'):
@@ -157,3 +158,72 @@ def calc_perf_stats_by_year(code: str, benchmark_code: str, start,
                 result = result.append(s.to_frame().T.set_index(
                     ['code', 'year']))
     return result.astype(np.float64)
+
+
+def normalize_data(df):
+    """数据归一化"""
+    return df / df.iloc[0]
+
+
+def get_qfq_stock_close(code, start, end):
+    """读取指定股票的收盘价日线数据"""
+    start_str = start if isinstance(start, str) else date_to_str(start)
+    end_str = end if isinstance(end, str) else date_to_str(end)
+
+    return QA.QA_fetch_stock_day_adv(code, start_str,
+                                     end_str).to_qfq().reset_index().drop(
+        columns=['code']).set_index('date').close
+
+
+def get_qfq_index_close(start, end) -> pd.DataFrame:
+    """读取指数的日线收盘价数据"""
+    start_str = start if isinstance(start, str) else date_to_str(start)
+    end_str = end if isinstance(end, str) else date_to_str(end)
+    code = get_benchmark_code()
+
+    return pd.DataFrame.from_dict(
+        {code: QA.QA_fetch_index_day_adv(code, start_str,
+                                         end_str).reset_index().drop(
+            columns=['code']).set_index('date').close})
+
+
+def plot_line_daily_close(title, codes, start, end,
+                          benchmark_code=get_benchmark_code(), legend_top='15%',
+                          datazoom_extra_type='both',
+                          is_datazoom_extra_show=True,
+                          datazoom_extra_orient='horizontal',
+                          **kwargs):
+    """使用 `pyechart` 绘制Line。使用 **收盘价格** 经过 **归一化** 后绘制。
+    绘制图片时横坐标可以缩放。
+
+    使用 `legend_top` 控制图例的位置。使其不会与标题重叠。
+
+    Args:
+        datazoom_extra_type: 参见 `line.add` 方法的同名参数
+        is_datazoom_extra_show: 参见 `line.add` 方法的同名参数
+        datazoom_extra_orient: 参见 `line.add` 方法的同名参数
+        legend_top: 参见 `line.add` 方法的同名参数
+        datazon
+        title: 主标题
+        codes: 待绘制的股票代码
+        start: 开始日期
+        end: 结束日期
+        benchmark_code: 指数代码
+        **kwargs: 参考 `Line` 中的参数
+
+    Returns:(pyecharts.Line,pd.DataFrame)
+    """
+    line = Line(title, **kwargs)
+    # 读取收盘价
+    df = get_qfq_index_close(start, end)
+    for code in codes:
+        df = df.join(pd.DataFrame.from_dict(
+            {code: get_qfq_stock_close(code, start, end)}))  # 取复权收盘价
+    df = normalize_data(df.fillna(method='ffill'))  # 归一化，并且填充nan值
+    line.add(benchmark_code, df.index.date, np.round(df[benchmark_code], 2))
+    for code in codes:
+        line.add(code, df.index.date, np.round(df[code], 2),
+                 datazoom_extra_type=datazoom_extra_type, legend_top=legend_top,
+                 is_datazoom_extra_show=is_datazoom_extra_show,
+                 datazoom_extra_orient=datazoom_extra_orient)
+    return line,df
