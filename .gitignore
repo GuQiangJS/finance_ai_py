@@ -116,3 +116,4 @@ dmypy.json
 .idea/
 example/data/
 .vscode/
+samples/render.html
