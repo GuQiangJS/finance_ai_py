@@ -151,7 +151,7 @@ class QA_Account_Ext(QA.QA_Account):
 
     """
 
-    def hold_table_fifo(self, datetime=None):
+    def hold_table_fifo(self):
         '''返回当前持仓的列表，与基类的 hold_table 不同，基类只返回总数量。
         此处采用 **先进先出法配对成交记录**。保持命名与 `QA_Performance.pnl_fifo`一致
 
