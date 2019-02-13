@@ -8,6 +8,7 @@ import pyfolio as pf
 from QUANTAXIS.QAUtil.QADate import QA_util_datetime_to_strdate as date_to_str
 from pandas import DataFrame
 from pyecharts import Line
+from talib import MA_Type
 
 
 def _test_index(code, start='2018-01-01', end='2018-12-31'):
@@ -226,4 +227,42 @@ def plot_line_daily_close(title, codes, start, end,
                  datazoom_extra_type=datazoom_extra_type, legend_top=legend_top,
                  is_datazoom_extra_show=is_datazoom_extra_show,
                  datazoom_extra_orient=datazoom_extra_orient)
-    return line,df
+    return line, df
+
+
+def _talib_matype_tostr(matype: MA_Type):
+    if matype == MA_Type.SMA:
+        return "Simple Moving Average"
+    elif matype == MA_Type.EMA:
+        return "Exponential Moving Average"
+    elif matype == MA_Type.DEMA:
+        return "Double Exponential Moving Average"
+    elif matype == MA_Type.KAMA:
+        return "Kaufman Adaptive Moving Averagee"
+    elif matype == MA_Type.MA:
+        return "Moving average"
+    elif matype == MA_Type.MAMA:
+        return "MESA Adaptive Moving Average"
+    elif matype == MA_Type.T3:
+        return "Triple Exponential Moving Average (T3)"
+    elif matype == MA_Type.TEMA:
+        return "Triple Exponential Moving Average"
+    elif matype == MA_Type.TRIMA:
+        return "Triangular Moving Average"
+    elif matype == MA_Type.WMA:
+        return "Weighted Moving Average"
+    return ''
+
+
+def talib_bbands_tostr(matype: MA_Type = None, timeperiod=None, nbdevup=None,
+                       nbdevdn=None):
+    s = ''
+    if matype:
+        s = s + '{0},'.format(_talib_matype_tostr(matype))
+    if timeperiod:
+        s = s + '时间段:{},'.format(timeperiod)
+    if nbdevup:
+        s = s + '上限:{} 标准差,'.format(nbdevup)
+    if nbdevdn:
+        s = s + '下限:{} 标准差,'.format(nbdevdn)
+    return s
