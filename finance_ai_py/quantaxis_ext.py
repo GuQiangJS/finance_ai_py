@@ -19,12 +19,12 @@ class QA_Performance_Ext(QA.QA_Performance):
         """
         X = dict(
             zip(
-                self.account.code,
-                [deque() for i in range(len(self.account.code))]
+                self.target.code,
+                [deque() for i in range(len(self.target.code))]
             )
         )
         pair_table = []
-        for _, data in self.account.history_table.iterrows():
+        for _, data in self.target.history_table.iterrows():
             while True:
                 if len(X[data.code]) == 0:
                     X[data.code].append(
