@@ -9,6 +9,8 @@ from QUANTAXIS.QAUtil.QADate import QA_util_datetime_to_strdate as date_to_str
 from pandas import DataFrame
 from pyecharts import Line
 from talib import MA_Type
+import talib
+from sklearn.preprocessing import MinMaxScaler
 
 
 def _test_index(code, start='2018-01-01', end='2018-12-31'):
@@ -266,3 +268,111 @@ def talib_bbands_tostr(matype: MA_Type = None, timeperiod=None, nbdevup=None,
     if nbdevdn:
         s = s + '下限:{} 标准差,'.format(nbdevdn)
     return s
+
+def get_talib_stock_daily(stock_code,s,e,append_ori_close=False,norms=['volume','amount','ht_dcphase','obv','adosc','ad','cci']):
+    """获取经过talib处理后的股票日线数据"""
+    stock_data=QA.QA_fetch_stock_day_adv(stock_code,s,e)
+    stock_df = stock_data.to_qfq().data
+    if append_ori_close:
+        stock_df['o_close'] = stock_data.data['close']
+    # stock_df['high_qfq'] = stock_data.to_qfq().data['high']
+    # stock_df['low_hfq'] = stock_data.to_hfq().data['low']
+
+    close = np.array(stock_df['close'])
+    high = np.array(stock_df['high'])
+    low = np.array(stock_df['low'])
+    _open = np.array(stock_df['open'])
+    _volume = np.array(stock_df['volume'])
+
+    stock_df['dema'] = talib.DEMA(close)
+    stock_df['ema'] = talib.EMA(close)
+    stock_df['ht_tradeline'] = talib.HT_TRENDLINE(close)
+    stock_df['kama'] = talib.KAMA(close)
+    stock_df['ma'] = talib.MA(close)
+    stock_df['mama'], stock_df['fama'] = talib.MAMA(close)
+    # MAVP
+    stock_df['midpoint'] = talib.MIDPOINT(close)
+    stock_df['midprice'] = talib.MIDPRICE(high, low)
+    stock_df['sar'] = talib.SAR(high, low)
+    stock_df['sarext'] = talib.SAREXT(high, low)
+    stock_df['sma'] = talib.SMA(close)
+    stock_df['t3'] = talib.T3(close)
+    stock_df['tema'] = talib.TEMA(close)
+    stock_df['trima'] = talib.TRIMA(close)
+    stock_df['wma'] = talib.WMA(close)
+
+    stock_df['adx'] = talib.ADX(high, low, close)
+    stock_df['adxr'] = talib.ADXR(high, low, close)
+    stock_df['apo'] = talib.APO(close)
+
+    stock_df['aroondown'], stock_df['aroonup'] = talib.AROON(high, low)
+    stock_df['aroonosc'] = talib.AROONOSC(high, low)
+    stock_df['bop'] = talib.BOP(_open, high, low, close)
+    stock_df['cci'] = talib.CCI(high, low, close)
+    stock_df['cmo'] = talib.CMO(close)
+    stock_df['dx'] = talib.DX(high, low, close)
+    # MACD
+    stock_df['macd'], stock_df['macdsignal'], stock_df['macdhist'] = talib.MACDEXT(
+        close)
+    # MACDFIX
+    stock_df['mfi'] = talib.MFI(high, low, close, _volume)
+    stock_df['minus_di'] = talib.MINUS_DI(high, low, close)
+    stock_df['minus_dm'] = talib.MINUS_DM(high, low)
+    stock_df['mom'] = talib.MOM(close)
+    stock_df['plus_di'] = talib.PLUS_DI(high, low, close)
+    stock_df['plus_dm'] = talib.PLUS_DM(high, low)
+    stock_df['ppo'] = talib.PPO(close)
+    stock_df['roc'] = talib.ROC(close)
+    stock_df['rocp'] = talib.ROCP(close)
+    stock_df['rocr'] = talib.ROCR(close)
+    stock_df['rocr100'] = talib.ROCR100(close)
+    stock_df['rsi'] = talib.RSI(close)
+    stock_df['slowk'], stock_df['slowd'] = talib.STOCH(high, low, close)
+    stock_df['fastk'], stock_df['fastd'] = talib.STOCHF(high, low, close)
+    # STOCHRSI - Stochastic Relative Strength Index
+    stock_df['trix'] = talib.TRIX(close)
+    stock_df['ultosc'] = talib.ULTOSC(high, low, close)
+    stock_df['willr'] = talib.WILLR(high, low, close)
+
+    stock_df['ad'] = talib.AD(high, low, close, _volume)
+    stock_df['adosc'] = talib.ADOSC(high, low, close, _volume)
+    stock_df['obv'] = talib.OBV(close, _volume)
+
+
+    stock_df['ht_dcperiod'] = talib.HT_DCPERIOD(close)
+    stock_df['ht_dcphase'] = talib.HT_DCPHASE(close)
+    stock_df['inphase'], stock_df['quadrature'] = talib.HT_PHASOR(close)
+    stock_df['sine'], stock_df['leadsine'] = talib.HT_PHASOR(close)
+    stock_df['ht_trendmode'] = talib.HT_TRENDMODE(close)
+
+    stock_df['avgprice'] = talib.AVGPRICE(_open, high, low, close)
+    stock_df['medprice'] = talib.MEDPRICE(high, low)
+    stock_df['typprice'] = talib.TYPPRICE(high, low, close)
+    stock_df['wclprice'] = talib.WCLPRICE(high, low, close)
+
+
+    stock_df['atr'] = talib.ATR(high, low, close)
+    stock_df['natr'] = talib.NATR(high, low, close)
+    stock_df['trange'] = talib.TRANGE(high, low, close)
+
+    stock_df['beta'] = talib.BETA(high, low)
+    stock_df['correl'] = talib.CORREL(high, low)
+    stock_df['linearreg'] = talib.LINEARREG(close)
+    stock_df['linearreg_angle'] = talib.LINEARREG_ANGLE(close)
+    stock_df['linearreg_intercept'] = talib.LINEARREG_INTERCEPT(close)
+    stock_df['linearreg_slope'] = talib.LINEARREG_SLOPE(close)
+    stock_df['stddev'] = talib.STDDEV(close)
+    stock_df['tsf'] = talib.TSF(close)
+    stock_df['var'] = talib.VAR(close)
+
+    stock_df = stock_df.reset_index().set_index('date')
+
+    if norms:
+        x = stock_df[norms].values #returns a numpy array
+        x_scaled = MinMaxScaler().fit_transform(x)
+        stock_df=stock_df.drop(columns=norms).join(pd.DataFrame(x_scaled,columns=norms,index=stock_df.index))
+
+    # stock_df = stock_df.drop(columns=['code', 'open', 'high', 'low'])
+    stock_df = stock_df.dropna()
+    stock_df=stock_df.drop(columns=['code'])
+    return stock_df
