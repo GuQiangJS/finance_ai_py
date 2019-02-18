@@ -113,6 +113,13 @@ jupyter nbextensions_configurator enable --user
 
 查看插件是否启动 `http://localhost:8888/nbextensions`
 
+### pyecharts for mac 可能会遇到的问题
+
+* 不显示图像。运行时浏览器后台有错误。![](images/QQ20190218-202434.png)
+
+    解决方案：下载 [echarts.min.js](https://echarts.baidu.com/dist/echarts.min.js) 放至对应目录。
+    > 例如：当前我本机的路径为:/usr/local/share/jupyter/nbextensions/,那么我就在这个文件夹下新增一个echarts的目录，将下载的js文件放进去。
+
 ### node.js
 
 `conda install -c conda-forge nodejs`
