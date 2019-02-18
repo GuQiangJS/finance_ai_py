@@ -5,12 +5,14 @@ import QUANTAXIS as QA
 import numpy as np
 import pandas as pd
 import pyfolio as pf
+import sklearn.linear_model
+import talib
 from QUANTAXIS.QAUtil.QADate import QA_util_datetime_to_strdate as date_to_str
 from pandas import DataFrame
 from pyecharts import Line
-from talib import MA_Type
-import talib
+from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
+from talib import MA_Type
 
 
 def _test_index(code, start='2018-01-01', end='2018-12-31'):
@@ -269,9 +271,12 @@ def talib_bbands_tostr(matype: MA_Type = None, timeperiod=None, nbdevup=None,
         s = s + '下限:{} 标准差,'.format(nbdevdn)
     return s
 
-def get_talib_stock_daily(stock_code,s,e,append_ori_close=False,norms=['volume','amount','ht_dcphase','obv','adosc','ad','cci']):
+
+def get_talib_stock_daily(stock_code, s, e, append_ori_close=False,
+                          norms=['volume', 'amount', 'ht_dcphase', 'obv',
+                                 'adosc', 'ad', 'cci']):
     """获取经过talib处理后的股票日线数据"""
-    stock_data=QA.QA_fetch_stock_day_adv(stock_code,s,e)
+    stock_data = QA.QA_fetch_stock_day_adv(stock_code, s, e)
     stock_df = stock_data.to_qfq().data
     if append_ori_close:
         stock_df['o_close'] = stock_data.data['close']
@@ -312,7 +317,8 @@ def get_talib_stock_daily(stock_code,s,e,append_ori_close=False,norms=['volume',
     stock_df['cmo'] = talib.CMO(close)
     stock_df['dx'] = talib.DX(high, low, close)
     # MACD
-    stock_df['macd'], stock_df['macdsignal'], stock_df['macdhist'] = talib.MACDEXT(
+    stock_df['macd'], stock_df['macdsignal'], stock_df[
+        'macdhist'] = talib.MACDEXT(
         close)
     # MACDFIX
     stock_df['mfi'] = talib.MFI(high, low, close, _volume)
@@ -338,7 +344,6 @@ def get_talib_stock_daily(stock_code,s,e,append_ori_close=False,norms=['volume',
     stock_df['adosc'] = talib.ADOSC(high, low, close, _volume)
     stock_df['obv'] = talib.OBV(close, _volume)
 
-
     stock_df['ht_dcperiod'] = talib.HT_DCPERIOD(close)
     stock_df['ht_dcphase'] = talib.HT_DCPHASE(close)
     stock_df['inphase'], stock_df['quadrature'] = talib.HT_PHASOR(close)
@@ -349,7 +354,6 @@ def get_talib_stock_daily(stock_code,s,e,append_ori_close=False,norms=['volume',
     stock_df['medprice'] = talib.MEDPRICE(high, low)
     stock_df['typprice'] = talib.TYPPRICE(high, low, close)
     stock_df['wclprice'] = talib.WCLPRICE(high, low, close)
-
 
     stock_df['atr'] = talib.ATR(high, low, close)
     stock_df['natr'] = talib.NATR(high, low, close)
@@ -368,11 +372,104 @@ def get_talib_stock_daily(stock_code,s,e,append_ori_close=False,norms=['volume',
     stock_df = stock_df.reset_index().set_index('date')
 
     if norms:
-        x = stock_df[norms].values #returns a numpy array
+        x = stock_df[norms].values  # returns a numpy array
         x_scaled = MinMaxScaler().fit_transform(x)
-        stock_df=stock_df.drop(columns=norms).join(pd.DataFrame(x_scaled,columns=norms,index=stock_df.index))
+        stock_df = stock_df.drop(columns=norms).join(
+            pd.DataFrame(x_scaled, columns=norms, index=stock_df.index))
 
     # stock_df = stock_df.drop(columns=['code', 'open', 'high', 'low'])
     stock_df = stock_df.dropna()
-    stock_df=stock_df.drop(columns=['code'])
+    stock_df = stock_df.drop(columns=['code'])
     return stock_df
+
+
+def get_calc_data(stock_code, s, e, fq='qfq',
+                  drop_columns=['code', 'preclose', 'adj'],
+                  scaler=['amount', 'volume'],
+                  scaler_func=sklearn.preprocessing.MinMaxScaler):
+    """获取计算用数据源
+
+    Args:
+        fq: 是否采用复权数据。默认使用前复权。如果不需要复权则传''即可。
+        stock_code:
+        s:
+        e:
+        drop_columns: 丢弃的列
+        scaler: 需要做归一化的数据列。
+        scaler_func: 做归一化时默认使用的方法。
+    """
+    raw_data = QA.QA_fetch_stock_day_adv(stock_code, s, e)
+    calc_data = raw_data.data.reset_index().set_index(
+        'date').copy()
+    if fq == 'qfq':
+        qfq_data = raw_data.to_qfq().data.reset_index().set_index(
+            'date')  # DataFrame格式
+        calc_data = qfq_data.copy()
+    elif fq == 'hfq':
+        qfq_data = raw_data.to_qfq().data.reset_index().set_index(
+            'date')  # DataFrame格式
+        calc_data = qfq_data.copy()
+    if drop_columns:
+        calc_data = calc_data.drop(columns=drop_columns)  # 丢弃多余的列
+    if scaler:
+        calc_data[scaler] = scaler_func().fit_transform(
+            calc_data[scaler])
+    return calc_data
+
+
+def create_validate_df_close(df, days) -> pd.DataFrame:
+    '''根据 `df` 中的 close 列，制作新的数据。
+    根据参数 `days` 增加列，有多少days增加多少列，每一列对应了当前日期后第几天的close数据
+    '''
+    if 'close' not in df.columns:
+        raise ValueError('数据中不包含 close 列。')
+    df_copy = df.copy()
+    for i in range(1, days + 1):
+        df_copy[i] = df_copy.shift(i * -1).close
+    return df_copy[[i for i in range(1, days + 1)]].dropna()
+
+
+def get_prediction_close(f, days, df) -> pd.DataFrame:
+    """对应了 `create_validate_df_close` 创建的数据的获取验证结果的方法
+
+    Args:
+        f: `fit` 方法返回值0的实例。
+        days:
+        df: `get_calc_data` 方法返回的计算数据的全部或部分
+
+    Returns:
+
+    """
+    test = f.predict(df)
+    result = df['close'].reset_index().join(
+        pd.DataFrame(test, columns=[i for i in range(1, days + 1)])).set_index(
+        'date')
+    return result
+    return result['close'][1:].to_frame().reset_index().join(
+        result.iloc[0].to_frame('prediction')).set_index('date')
+
+
+def fit(df, days, test_size=0.1, func=sklearn.linear_model.Ridge,
+        create_validate_func=create_validate_df_close,random_state=4):
+    """
+    Args:
+        df:
+        days:
+        func:
+        create_validate_func:
+        test_size: 测试集占比
+
+    Returns:
+        (func经过fit后的实例，X_train, X_test, y_train, y_test)
+    """
+    y = create_validate_func(df, days)
+    X = df[df.index.isin(y.index)]
+    #     y=np.round(y,4)
+    #     X=np.round(X,4)
+    # 定义测试
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=test_size,random_state=random_state)
+    X_train.shape, X_test.shape, y_train.shape, y_test.shape
+    f = func()
+    f.fit(X_train, y_train)
+    return f, X_train, X_test, y_train, y_test
