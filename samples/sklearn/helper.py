@@ -120,7 +120,9 @@ def plot_report(days, func, X,y, column: str = 'close', title='', subtitle=''):
     for col in r.columns:
         line.add(col, r.index.date, r[col], datazoom_extra_type='both',
              is_datazoom_extra_show=True,
-             datazoom_extra_orient='horizontal')
+             datazoom_extra_orient='horizontal',
+            yaxis_min='dataMin',
+            yaxis_max='dataMax')
     # line.add('实际值', data.index.date, data[column], datazoom_extra_type='both',
     #          is_datazoom_extra_show=True,
     #          datazoom_extra_orient='horizontal')
