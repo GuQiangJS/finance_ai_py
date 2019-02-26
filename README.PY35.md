@@ -72,14 +72,22 @@
 
 11. 安装 portfolioopt
 
-    `pip install portfolioopt` 或者 `pip install git+https://github.com/czielinski/portfolioopt.git --upgrade`
+     `pip install portfolioopt` 或者 `pip install git+https://github.com/czielinski/portfolioopt.git --upgrade`
 
-12. 安装 python.app
+12. 安装TensorFlow
 
-    `conda install -c conda-forge python.app`
-    > 对于在Mac下运行来说，需要安装这个。**并且以 pythonw 方式运行**。否则会出现以下错误：
-    > ImportError: Python is not installed as a framework. The Mac OS X backend will not be able to function correctly if Python is not installed as a framework. See the Python documentation for more information on installing Python as a framework on Mac OS X. Please either reinstall Python as a framework, or try one of the other backends. If you are using (Ana)Conda please install python.app and replace the use of 'python' with 'pythonw'. See 'Working with Matplotlib on OSX' in the Matplotlib FAQ for more information.
-    > https://matplotlib.org/faq/osx_framework.html#conda
+     `pip install tensorflow`(CPU-only)
+
+13. 安装 Keras
+
+     `pip install keras`
+
+14. 安装 python.app
+
+     `conda install -c conda-forge python.app`
+     > 对于在Mac下运行来说，需要安装这个。**并且以 pythonw 方式运行**。否则会出现以下错误：
+     > ImportError: Python is not installed as a framework. The Mac OS X backend will not be able to function correctly if Python is not installed as a framework. See the Python documentation for more information on installing Python as a framework on Mac OS X. Please either reinstall Python as a framework, or try one of the other backends. If you are using (Ana)Conda please install python.app and replace the use of 'python' with 'pythonw'. See 'Working with Matplotlib on OSX' in the Matplotlib FAQ for more information.
+     > https://matplotlib.org/faq/osx_framework.html#conda
 
 ---
 
@@ -118,6 +126,7 @@ jupyter nbextensions_configurator enable --user
 * 不显示图像。运行时浏览器后台有错误。![](images/QQ20190218-202434.png)
 
     解决方案：下载 [echarts.min.js](https://echarts.baidu.com/dist/echarts.min.js) 放至对应目录。
+
     > 例如：当前我本机的路径为:/usr/local/share/jupyter/nbextensions/,那么我就在这个文件夹下新增一个echarts的目录，将下载的js文件放进去。
 
 ### node.js
