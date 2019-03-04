@@ -20,6 +20,9 @@ def get_raw_data(stock_code=STOCK_CODE,start_time=START_TIME,end_time=END_TIME)-
     """
     return QA.QA_fetch_stock_day_adv(stock_code, start_time, end_time).to_qfq().data.reset_index().set_index('date')
 
+def get_benchmark_raw_data(code=BENCHMARK_CODE,start_time=START_TIME,end_time=END_TIME,columns=['open','high','low','close','volume'])->pd.DataFrame:
+    return QA.QA_fetch_index_day_adv(code, start_time, end_time).data.reset_index().set_index('date')[columns]
+
 def augFeatures(data:pd.DataFrame)->pd.DataFrame:
     df=data.copy()
     df["year"] = df.index.year
